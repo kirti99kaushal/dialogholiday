@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+   <body>
+      <table border = 1>
+         <thead>
+            <td>Month</td>
+            <td>Date</td>
+            <td>Hsoliday</td>
+            
+         </thead>
+         
+         {% for row in rows %}
+            <tr>
+               <td>{{row["month"]}}</td>
+               <td>{{row["date"]}}</td>
+               <td> {{ row["holiday"]}}</td>
+             
+            </tr>
+         {% endfor %}
+      </table>
+      
+      <a href = "/">Go back to home page</a>
+   </body>
+</html>
