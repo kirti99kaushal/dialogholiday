@@ -1,16 +1,69 @@
-import sqlite3
-
-conn = sqlite3.connect('holidays.db')
-print ("Opened database successfully")
-
-#conn.execute('CREATE TABLE holidays (month TEXT, date TEXT, holiday TEXT)')
-#print ("Table created successfully")
-conn.close()
-
+from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
+from app import app, db
 from flask import Flask, render_template, request,jsonify
-#from flask import Flask, render_template, flash, request,jsonify
-import sqlite3 as sql
 app = Flask(__name__)
+
+db = SQLAlchemy()
+
+POSTGRES = {
+    'user': 'iqldyxtbrctwyb',
+    'pw': '4112964cabd8088ffe774fa41dd87f1f3c4060d775edfefa4a61cc7f6b13a3d7',
+    'db': 'dbd2sh9omcm15f',
+    'host': 'ec2-54-243-128-95.compute-1.amazonaws.com',
+    'port': '5432',
+}
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
+%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+
+
+#from flask import Flask, render_template, flash, request,jsonify
+
+
+
+class BaseModel(db.Model):
+"""Base data model for all objects"""
+__abstract__ = True
+    # define here __repr__ and json methods or any common method
+    # that you need for all your models
+
+css YourModel(BaseModel):
+"""modelal for one of your table"""
+    __tablename__ = 'holidays'
+    # define your model
+
+manager = Manager(app)
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
+
+
+
+    
+
+
+class d_holiday(db.Model):
+    __tablename__ = 'holidays'
+
+    date = db.Column(db.Integer())
+    month = db.Column(db.String())
+    holiday = db.Column(db.String())
+    
+    def __init__(self, date, month, holiday):
+        self.date = date
+        self.month = month
+        self.holiday = holiday
+
+    def __repr__(self):
+        return '<month {}>'.format(self.month)
+    
+    def serialize(self):
+        return {
+            'date': self.date, 
+            'month': self.month,
+            'holiday': self.holiday,
+      
+        }
 
 @app.route('/')
 def home():
@@ -22,36 +75,12 @@ def new_student():
 
 @app.route('/results', methods = ['POST'])
 def results():
-    con=sql.connect("holidays.db")
-    month = request.form['month']
-    cur = con.cursor()
-    cur.execute("SELECT * FROM holidays WHERE month=?",(month,))    
-    #cur.execute("SELECT * FROM students ")
-    rows = cur.fetchall()
-    print("print rows", rows)
-    return render_template("search.html",data=rows)
+    try:
+        holidays=d_holiday.query.filter_by(month=month_).first()
+        return jsonify(holidays.serialize())
+    except Exception as e:
+      return(str(e))
 
-@app.route('/jresults', methods = ['POST'])
-def jresults():
-    con=sql.connect("holidays.db")
-    #month = request.form['month']
-    req = request.get_json(silent=True, force=True)
-    action = req['queryResult']['parameters']['Holiday']
-    month = req['queryResult']['parameters']['Months']
-    cur = con.cursor()
-    cur.execute("SELECT * FROM holidays WHERE month=?",(month,))    
-    #cur.execute("SELECT * FROM students ")
-    rows = cur.fetchall()
-    print("print rows", rows)
-    i = 0
-    for row in rows:
-       i = i +1 
-       print('-- ',i,'-', row[0],'-',row[1],'-',row[2])
-    response =  """
-                Response : {0}
-                """.format(rows)
-    reply = {"fulfillmentText": response,}
-    return jsonify(reply)
 
 @app.route('/search', methods = ['POST', 'GET'])
 def search():
@@ -62,39 +91,30 @@ def search():
 
 @app.route('/list')
 def list():
-   con = sql.connect("holidays.db")
-   con.row_factory = sql.Row
-   
-   cur = con.cursor()
-   cur.execute("select * from holidays")
-   
-   rows = cur.fetchall();
-   return render_template("list.html",rows = rows)
+    try:
+        holidays=d_holiday.query.all()
+        return  jsonify([e.serialize() for e in holidays])
+    except Exception as e:
+      return(str(e))
+
 
 @app.route('/addrec',methods = ['POST', 'GET'])
 def addrec():
-   if request.method == 'POST':
-       
-      
-      month = request.form['month']
-      date = request.form['date']
-      holiday = request.form['holiday']
-        
-         
-      with sql.connect("holidays.db") as con:
-         cur = con.cursor()
-            
-         cur.execute("INSERT INTO holidays (month,date,holiday) VALUES (?,?,?)",(month,date,holiday) )
-            
-         con.commit()
-         msg = "Record successfully added"
-      #except:
-      con.rollback()
-      msg = "error in insert operation"
-      
-      
-      return render_template("result.html",msg = msg)
-      con.close()
+   date=request.args.get('date')
+    month=request.args.get('month')
+    holiday=request.args.get('holiday')
+    try:
+        holidays=holidays(
+            date=date,
+            month=month,
+            holiday=holiday
+        )
+        db.session.add(holidays)
+        db.session.commit()
+        return "Calendar updated"
+    except Exception as e:
+      return(str(e))
 
 if __name__ == '__main__':
    app.run(debug = True)
+   manager.run()
