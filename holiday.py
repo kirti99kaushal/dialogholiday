@@ -87,17 +87,17 @@ def addrec():
   date=request.args.get('date')
   month=request.args.get('month')
   holiday=request.args.get('holiday')
-   try:
+  try:
      holidays=holidays(
-      date=date,
-      month=month,
-      holiday=holiday
+     date=date,
+     month=month,
+     holiday=holiday
         )
-      db.session.add(holidays)
-      db.session.commit()
-      return "Calendar updated"
-    except Exception as e:
-      return(str(e))
+     db.session.add(holidays)
+     db.session.commit()
+     return "Calendar updated"
+  except Exception as e:
+     return(str(e))
 
 if __name__ == '__main__':
    app.run(debug = True)
