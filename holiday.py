@@ -84,9 +84,9 @@ def list():
 
 @app.route('/addrec',methods = ['POST', 'GET'])
 def addrec():
-    date=request.args.get('date')
-    month=request.args.get('month')
-    holiday=request.args.get('holiday')
+  date=request.args.get('date')
+  month=request.args.get('month')
+  holiday=request.args.get('holiday')
     try:
         holidays=holidays(
             date=date,
