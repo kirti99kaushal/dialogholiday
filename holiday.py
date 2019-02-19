@@ -1,4 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
+from flask_postgres import SQL
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from app import app, db
@@ -7,7 +7,7 @@ from models import d_holiday
 
 app = Flask(__name__)
 
-db = SQLAlchemy()
+db = SQL()
 
 POSTGRES = {
     'user': 'iqldyxtbrctwyb',
@@ -16,7 +16,7 @@ POSTGRES = {
     'host': 'ec2-54-243-128-95.compute-1.amazonaws.com',
     'port': '5432',
 }
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
+app.config['SQL_DATABASE_URI'] = 'postgresql://%(user)s:\
 %(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 
 
