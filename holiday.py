@@ -3,6 +3,8 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from app import app, db
 from flask import Flask, render_template, request,jsonify
+from models import d_holiday
+
 app = Flask(__name__)
 
 db = SQLAlchemy()
@@ -23,11 +25,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 manager = Manager(app)
 migrate = Migrate(app, db)
 manager.add_command('db', MigrateCommand)
-
-
-
-    
-
 
 class d_holiday(db.Model):
     __tablename__ = 'holidays'
@@ -50,7 +47,7 @@ class d_holiday(db.Model):
             'month': self.month,
             'holiday': self.holiday,
       
-        }
+          }
 
 @app.route('/')
 def home():
